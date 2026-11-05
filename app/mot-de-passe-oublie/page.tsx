@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Mot de passe oublié | EMSI",
@@ -45,10 +44,10 @@ export default function ForgotPassword() {
             Envoyer le lien
           </button>
 
-          <Link className="back-link" href="/">
+          <a className="back-link" href="/">
             <span aria-hidden="true">←</span>
             Retour à la connexion
-          </Link>
+          </a>
         </div>
       </section>
     </main>

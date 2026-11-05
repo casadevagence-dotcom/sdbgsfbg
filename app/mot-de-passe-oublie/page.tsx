@@ -44,7 +44,7 @@ export default function ForgotPassword() {
             Envoyer le lien
           </button>
 
-          <a className="back-link" href="/">
+          <a className="back-link" href="/login">
             <span aria-hidden="true">←</span>
             Retour à la connexion
           </a>

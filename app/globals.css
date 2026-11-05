@@ -78,6 +78,10 @@ input {
   margin-bottom: 38px;
 }
 
+.floating-field {
+  position: relative;
+}
+
 .field input {
   width: 100%;
   height: 56px;
@@ -103,6 +107,33 @@ input {
   background: #f7f7f7;
 }
 
+.floating-field input {
+  padding: 17px 16px 0;
+  line-height: 18px;
+}
+
+.floating-field > span {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transform-origin: left top;
+  transition: top 120ms ease, font-size 120ms ease, transform 120ms ease;
+}
+
+.floating-field input:focus + span,
+.floating-field input:not(:placeholder-shown) + span {
+  top: 10px;
+  font-size: 10px;
+  line-height: 12px;
+  transform: none;
+}
+
 .login-form button,
 .reset-form button {
   width: 100%;
@@ -116,6 +147,18 @@ input {
   font-size: 14px;
   font-weight: 700;
   cursor: not-allowed;
+  transition: background-color 150ms ease, color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.login-form:has(.email-field input:not(:placeholder-shown)):has(
+    .password-field input:not(:placeholder-shown)
+  )
+  button {
+  background: #15945a;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  cursor: default;
 }
 
 .login-form a {

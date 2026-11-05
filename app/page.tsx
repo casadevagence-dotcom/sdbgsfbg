@@ -16,24 +16,24 @@ export default function Home() {
         <h1 id="login-title">Connexion</h1>
 
         <div className="login-form" role="form" aria-label="Connexion">
-          <label className="field">
-            <span className="sr-only">Email</span>
+          <label className="field floating-field email-field">
             <input
               type="email"
-              placeholder="Email*"
+              placeholder=" "
               autoComplete="off"
               aria-required="true"
             />
+            <span>Email*</span>
           </label>
 
-          <label className="field">
-            <span className="sr-only">Mot de passe</span>
+          <label className="field floating-field password-field">
             <input
               type="password"
-              placeholder="Mot de passe*"
+              placeholder=" "
               autoComplete="off"
               aria-required="true"
             />
+            <span>Mot de passe*</span>
           </label>
 
           <button type="button" disabled>

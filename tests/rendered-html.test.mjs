@@ -1,91 +1,81 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import { createServer } from "node:net";
 import test from "node:test";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
-
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+async function getAvailablePort() {
+  const server = createServer();
+  server.unref();
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const address = server.address();
+  assert.notEqual(address, null);
+  assert.equal(typeof address, "object");
+  const port = address.port;
+  server.close();
+  await once(server, "close");
+  return port;
 }
 
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+async function waitForServer(url, processExited) {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const result = await Promise.race([
+      fetch(url).then(() => "ready").catch(() => "retry"),
+      processExited.then(() => "exited"),
+    ]);
+    if (result === "ready") return;
+    if (result === "exited") throw new Error("Next.js exited before becoming ready");
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error("Next.js did not become ready in time");
+}
 
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
+test("serves the production routes", { timeout: 30_000 }, async () => {
+  const port = await getAvailablePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  let output = "";
+  const nextProcess = spawn(
+    process.execPath,
+    [
+      "node_modules/next/dist/bin/next",
+      "start",
+      "--hostname",
+      "127.0.0.1",
+      "--port",
+      String(port),
+    ],
+    {
+      cwd: new URL("..", import.meta.url),
+      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
   );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
-});
+  nextProcess.stdout.on("data", (chunk) => { output += chunk; });
+  nextProcess.stderr.on("data", (chunk) => { output += chunk; });
+  const processExited = once(nextProcess, "exit");
 
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
-  ]);
+  try {
+    await waitForServer(`${baseUrl}/login`, processExited);
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
+    const rootResponse = await fetch(baseUrl, { redirect: "manual" });
+    assert.ok([307, 308].includes(rootResponse.status));
+    assert.equal(rootResponse.headers.get("location"), "/login");
 
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
+    const loginResponse = await fetch(`${baseUrl}/login`);
+    assert.equal(loginResponse.status, 200);
+    const loginHtml = await loginResponse.text();
+    assert.match(loginHtml, /Connexion/);
+    assert.match(loginHtml, /emsi-logo\.png/);
+    assert.match(loginHtml, /mot-de-passe-oublie/);
 
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
-
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+    const resetResponse = await fetch(`${baseUrl}/mot-de-passe-oublie`);
+    assert.equal(resetResponse.status, 200);
+    assert.match(await resetResponse.text(), /Mot de passe oublié/);
+  } catch (error) {
+    throw new Error(`${error.message}\n${output}`);
+  } finally {
+    if (nextProcess.exitCode === null) nextProcess.kill("SIGTERM");
+    await processExited;
+  }
 });

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -40,9 +41,9 @@ export default function Home() {
             Se connecter
           </button>
 
-          <a href="#" aria-disabled="true">
+          <Link href="/mot-de-passe-oublie">
             Mot de passe oublié ?
-          </a>
+          </Link>
         </div>
       </section>
     </main>

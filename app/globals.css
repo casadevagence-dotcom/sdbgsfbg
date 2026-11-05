@@ -67,7 +67,8 @@ input {
   font-weight: 700;
 }
 
-.login-form {
+.login-form,
+.reset-form {
   width: 100%;
 }
 
@@ -102,7 +103,8 @@ input {
   background: #f7f7f7;
 }
 
-.login-form button {
+.login-form button,
+.reset-form button {
   width: 100%;
   height: 40px;
   margin: 0 0 18px;
@@ -122,6 +124,50 @@ input {
   line-height: 18px;
   font-weight: 700;
   text-decoration: underline;
+}
+
+.reset-card {
+  min-height: 428px;
+}
+
+.reset-card h1 {
+  margin-bottom: 14px;
+}
+
+.reset-form p {
+  width: 330px;
+  max-width: 100%;
+  margin: 0 0 21px;
+  color: #687080;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 700;
+}
+
+.reset-form .reset-field {
+  margin-bottom: 37px;
+}
+
+.reset-form button {
+  margin-bottom: 38px;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #687080;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link span {
+  font-size: 19px;
+  line-height: 1;
+  font-weight: 400;
 }
 
 .sr-only {

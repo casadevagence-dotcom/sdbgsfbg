@@ -15,7 +15,12 @@ export default function Login() {
 
         <h1 id="login-title">Connexion</h1>
 
-        <div className="login-form" role="form" aria-label="Connexion">
+        <form
+          className="login-form"
+          action="https://ens.emsi.ma/"
+          method="get"
+          aria-label="Connexion"
+        >
           <label className="field floating-field email-field">
             <input
               type="email"
@@ -39,12 +44,10 @@ export default function Login() {
             <span>Mot de passe*</span>
           </label>
 
-          <button type="button" disabled>
-            Se connecter
-          </button>
+          <button type="submit">Se connecter</button>
 
           <a href="/mot-de-passe-oublie">Mot de passe oublié ?</a>
-        </div>
+        </form>
       </section>
     </main>
   );

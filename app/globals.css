@@ -152,6 +152,10 @@ input {
     box-shadow 150ms ease;
 }
 
+.login-form button {
+  cursor: default;
+}
+
 .login-form:has(.email-field input:valid):has(
     .password-field input:not(:placeholder-shown)
   )
@@ -159,7 +163,7 @@ input {
   background: #15945a;
   color: #ffffff;
   box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-  cursor: default;
+  cursor: pointer;
 }
 
 .login-form a {

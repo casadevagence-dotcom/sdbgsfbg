@@ -19,8 +19,10 @@ export default function Login() {
           <label className="field floating-field email-field">
             <input
               type="email"
+              inputMode="email"
               placeholder=" "
               autoComplete="off"
+              required
               aria-required="true"
             />
             <span>Email*</span>
@@ -31,6 +33,7 @@ export default function Login() {
               type="password"
               placeholder=" "
               autoComplete="off"
+              required
               aria-required="true"
             />
             <span>Mot de passe*</span>

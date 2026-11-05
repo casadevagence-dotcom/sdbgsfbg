@@ -151,7 +151,7 @@ input {
     box-shadow 150ms ease;
 }
 
-.login-form:has(.email-field input:not(:placeholder-shown)):has(
+.login-form:has(.email-field input:valid):has(
     .password-field input:not(:placeholder-shown)
   )
   button {

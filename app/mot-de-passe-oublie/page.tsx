@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Mot de passe oublié | EMSI",
+  title: "CampuSphere Cloud Instructor Portal",
   description: "Reproduction visuelle de la réinitialisation EMSI.",
 };
 
